@@ -1,0 +1,68 @@
+# 쿼리문 실행 [ctrl]+[F9]
+
+DROP TABLE tbl_goods;
+
+# 상품 테이블 생성
+CREATE TABLE tbl_goods (
+	goodsId					CHAR(10)				COMMENT '일련번호',
+	userId						VARCHAR(30)		COMMENT '담당자',
+	goodsImg				VARCHAR(250)	COMMENT '상품이미지',
+	goodsName			VARCHAR(50)		NOT NULL				COMMENT '상품명',
+	goodsEngName	VARCHAR(50)		COMMENT '상품영문명',
+	goodsType			VARCHAR(30)		NOT NULL				COMMENT '상품분류',
+	buyPrice				INT							COMMENT '매입가격',
+	sellPrice					INT							COMMENT '판매가격',
+	amount					INT							COMMENT '재고수량',
+	goodsContent		TEXT						COMMENT '상품상세설명',
+	regDate					TIMESTAMP			DEFAULT NOW()	COMMENT '작성일',
+	updateDate			TIMESTAMP			DEFAULT NOW()	COMMENT '수정일',
+	PRIMARY KEY (goodsId),
+	FOREIGN KEY (userId) REFERENCES tbl_member (userId)
+) COMMENT '상품테이블';
+
+COMMIT;
+
+
+DESC tbl_goods;
+
+
+# 상품 등록
+INSERT INTO tbl_goods (goodsId, userId, goodsName, goodsEngName, goodsType, buyPrice, amount)
+VALUES ('p0001', 'admin', '컴퓨터', 'pc-high-desktop01','전산용품', 2850000, 10);
+INSERT INTO tbl_goods (goodsId, userId, goodsName, goodsEngName, goodsType, buyPrice, sellPrice, amount)
+VALUES ('p0002', 'admin', '노트북', 'notebook-nh01','전산용품', 2450000, 2950000, 5);
+INSERT INTO tbl_goods (goodsId, userId, goodsName, goodsEngName, goodsType, buyPrice, sellPrice, amount)
+VALUES ('p0003', 'user01', '냉장고', 'diosDE2000','주방용품', 3250000, 3850000, 5);
+INSERT INTO tbl_goods (goodsId, userId, goodsName, goodsEngName, goodsType, buyPrice, sellPrice, amount)
+VALUES ('p0004', 'user01', '세탁기', 'dromDM2000','주방용품', 2500000, 2850000, 5);
+INSERT INTO tbl_goods (goodsId, userId, goodsName, goodsEngName, goodsType, buyPrice, sellPrice, amount)
+VALUES ('p0005', 'user02', '아웃도어', 'outdoor-OTN01','의류용품', 258000, 355000, 10);
+INSERT INTO tbl_goods (goodsId, userId, goodsName, goodsEngName, goodsType, buyPrice, sellPrice, amount)
+VALUES ('p0006', 'user02', '셔츠', 'shirt-SHN01','의류용품', 54500, 78800, 20);
+
+COMMIT;
+
+
+# 상품 목록
+SELECT * FROM tbl_goods;
+
+
+# 상품 조회
+SELECT * FROM tbl_goods
+WHERE goodsId = 'p0001';
+
+
+# 상품 수정
+UPDATE tbl_goods SET
+	sellPrice = 3450000
+WHERE goodsId = 'p0001';
+
+
+# 상품 삭제
+DELETE FROM tbl_goods
+WHERE goodsId = 'p0001';
+
+
+
+
+

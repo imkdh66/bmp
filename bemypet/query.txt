@@ -1,0 +1,324 @@
+# 쿼리문 실행 [ctrl]+[F9]
+
+SHOW DATABASES;
+
+
+# fullstack 데이터베이스 생성
+create database fullstack;
+
+
+# 데이터베이스 사용자(heaven, heaven1234)를 생성
+CREATE USER 'heaven'@'localhost' IDENTIFIED BY 'heaven1234';
+COMMIT;
+
+
+# 데이터베이스 사용자 목록을 조회한다.
+SELECT * FROM mysql.user;
+
+
+# heaven 사용자에게 모든 권한을 부여한다. (*.* : 모든 데이터베이스의 모든 권한)
+GRANT ALL PRIVILEGES ON fullstack.* TO 'heaven'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'heaven'@'localhost';
+
+
+# 데이터베이스 선택
+USE fullstack;
+
+
+# 테이블 생성
+# 테이블명: tbl_board
+
+# [데이터베이스 모델링]
+# 컬럼명, 데이터형, 제약조건 (컬럼명:데이터형/제약조건)
+# bno(PK, 게시물번호:Board NO.) : int / auto_increment, 
+# title(게시물 제목) : varchar(50) / not null, 
+# content(게시물 내용) : text / not null, 
+# writer(작성자) : varchar(25) / not null, 
+# regdate(작성일) : timestamp / default now(), 
+# viewcnt(조회수) : int / default 0
+
+CREATE TABLE tbl_board (
+   bno      INT         AUTO_INCREMENT COMMENT '게시물번호',
+   title    VARCHAR(50) NOT NULL       COMMENT '게시물제목',
+   content  TEXT        NOT NULL       COMMENT '게시물내용',
+   writer   VARCHAR(25) NOT NULL       COMMENT '작성자',
+   regdate  TIMESTAMP   DEFAULT NOW()  COMMENT '작성일',
+   viewcnt  INT         DEFAULT 0     	COMMENT '조회수',
+   PRIMARY KEY (bno)
+) COMMENT '게시물';
+
+COMMIT;
+
+DESC tbl_board;
+
+
+# 게시물에 데이터 삽입 테스트
+INSERT INTO tbl_board (title, content, writer)
+VALUES ('게시물 테스트 제목1', '게시물 테스트 내용1', '작성자1');
+INSERT INTO tbl_board (title, content, writer)
+VALUES ('게시물 테스트 제목2', '게시물 테스트 내용2', '작성자2');
+INSERT INTO tbl_board (title, content, writer)
+VALUES ('게시물 테스트 제목3', '게시물 테스트 내용3', '작성자3');
+INSERT INTO tbl_board (title, content, writer)
+VALUES ('게시물 테스트 제목4', '게시물 테스트 내용4', '작성자4');
+INSERT INTO tbl_board (title, content, writer)
+VALUES ('게시물 테스트 제목5', '게시물 테스트 내용5', '작성자5');
+
+COMMIT;
+
+SELECT * FROM tbl_board;
+
+
+# 인서트 셀릭트문: 기존 테이블의 데이터를 선택해서 저장한다.
+INSERT INTO tbl_board (title, content, writer)
+SELECT title, content, writer FROM tbl_board;
+
+COMMIT;
+
+
+SELECT * FROM tbl_board
+ORDER BY bno DESC; # SORT(정렬)을 내림차순 정렬
+
+
+# 게시물 하나를 조회(bno)
+SELECT bno, title, regdate # 2.컬럼을 선택
+FROM tbl_board # 1.테이블을 선택
+WHERE bno = 1; # 3.조건식을 작성
+
+
+# 게시물 하나를 삭제(bno)
+DELETE FROM tbl_board
+where bno = 1;
+
+
+# 게시물 하나를 수정(bno)
+UPDATE tbl_board SET
+	title = '게시물 수정 테스트 제목1',
+	content = '게시물 수정 테스트 내용1',
+	writer = '수정 작성자'
+WHERE bno = 1;
+
+
+# 전체 게시물 개수를 조회
+SELECT COUNT(bno) FROM tbl_board;
+
+
+# 게시물 10개씩 출력
+SELECT bno, title, writer, regdate
+FROM tbl_board
+ORDER by bno DESC
+LIMIT 0, 10;
+# 시작 번호(1번), 수량(10개)
+
+SELECT bno, title, writer, regdate
+FROM tbl_board
+ORDER by bno DESC
+LIMIT 10, 10;
+# limit 10, 10; 시작 번호(11번)
+
+SELECT bno, title, writer, regdate
+FROM tbl_board
+ORDER by bno DESC
+LIMIT 20, 10;
+# limit 20, 10; 시작 번호(21번)
+
+
+# not null 로 지정한 컬럼을 검색의 대상으로 설정한다.
+# title, content, writer
+
+# 게시물 제목 검색
+SELECT *
+FROM tbl_board
+WHERE title LIKE '%테스트%';
+
+
+# 게시물 내용 검색
+SELECT *
+FROM tbl_board
+WHERE content LIKE '%테스트%';
+
+
+# 게시물 작성자 검색
+SELECT *
+FROM tbl_board
+WHERE writer LIKE '%테스트%';
+
+
+# 게시물 제목과 내용 검색
+SELECT *
+FROM tbl_board
+WHERE writer LIKE '%테스트%' OR content LIKE '%테스트%';
+
+
+# 댓글 테이블 생성
+# 댓글 테이블은 댓글번호, 게시물번호, 작성자, 댓글내용, 작성일
+# tbl_reply
+# rno(PK: PRIMARY KEY)	int 			not null
+# bno(FK: FOREIGN KEY) 	int			not null
+# writer 					varchar		not null
+# content				text		not null
+# regdate 				timestamp 	default now()
+
+CREATE TABLE tbl_reply(
+	rno			INT 							AUTO_INCREMENT		COMMENT '댓글번호',
+	bno	 		INT							NOT NULL						COMMENT '게시물번호',
+	writer 	VARCHAR(25)		NOT NULL						COMMENT '작성자',
+	content	TEXT	not NULL	COMMENT '댓글내용',
+	regdate 	TIMESTAMP 		DEFAULT NOW()			COMMENT '작성일',
+	PRIMARY KEY(rno),
+	FOREIGN KEY(bno) REFERENCES tbl_board (bno)
+) COMMENT '댓글게시물';
+
+COMMIT;
+
+
+# 댓글 등록 테스트
+INSERT INTO tbl_reply (bno, writer, content)
+VALUES (6640, '댓글작성자', '댓글내용');
+
+
+SELECT * FROM tbl_board ORDER BY bno DESC;
+
+
+ALTER TABLE tbl_reply
+MODIFY content TEXT NOT NULL COMMENT '댓글내용';
+
+
+# 댓글 목록 조회 테스트
+SELECT * FROM tbl_reply
+WHERE bno = 6640;
+
+
+# 댓글 하나 조회 테스트
+SELECT * FROM tbl_reply
+WHERE rno = 1 and bno = 6640;
+
+
+# 댓글 하나 삭제 테스트
+DELETE FROM tbl_reply
+WHERE rno = 1 and bno = 6640;
+
+
+# 댓글 하나 수정 테스트
+UPDATE tbl_reply SET
+	writer = '댓글수정작성자',
+	content = '댓글수정내용'
+WHERE rno = 1 and bno = 6640;
+
+
+# 회원 테이블
+# tbl_member
+# userid
+# userpass
+# username
+# nickname
+# regdate
+# updatedate
+
+CREATE TABLE tbl_member (
+	userid				VARCHAR(30)		COMMENT '회원아이디',	
+	userpass		VARCHAR(50)		NOT NULL				COMMENT '회원비밀번호',
+	username		VARCHAR(30)		NOT NULL				COMMENT '회원이름',
+	nickname		VARCHAR(30)		NOT NULL				COMMENT '닉네임',
+	regdate			TIMESTAMP			DEFAULT NOW()	COMMENT '작성일',
+	updatedate	TIMESTAMP			DEFAULT NOW()	COMMENT '수정일',
+	PRIMARY KEY (userid),
+	UNIQUE (nickname)
+) COMMENT '회원테이블';
+
+COMMIT;
+
+
+# 회원 가입 테스트
+
+INSERT INTO tbl_member (userid, userpass, username, nickname)
+VALUES ('admin','1234','관리자','관리자');
+INSERT INTO tbl_member (userId, userPass, userName, nickName)
+VALUES ('user01','1234','사용자','사용자01');
+INSERT INTO tbl_member (userId, userPass, userName, nickName)
+VALUES ('user02','1234','사용자','사용자02');
+INSERT INTO tbl_member (userId, userPass, userName, nickName)
+VALUES ('user03','1234','사용자','사용자03');
+INSERT INTO tbl_member (userId, userPass, userName, nickName)
+VALUES ('user04','1234','사용자','사용자04');
+INSERT INTO tbl_member (userId, userPass, userName, nickName)
+VALUES ('user05','1234','사용자','사용자05');
+
+
+# 회원 목록 테스트
+SELECT * FROM tbl_member;
+
+
+# 회원 조회
+SELECT userid, userpass
+FROM tbl_member
+WHERE userid = 'admin';
+
+
+# 회원 수정
+update tbl_member SET 
+	userpass = '2222',
+	username = '대표'
+	updatedate = NOW()
+WHERE userid = 'admin';
+
+
+# 회원 삭제
+DELETE FROM tbl_member
+WHERE userid = 'admin';
+
+
+# 로그인
+SELECT userid, username, nuckname
+FROM tbl_member
+WHERE userid='admin' AND userpass='1234';
+
+
+# 아이디 중복 확인
+SELECT useid
+FROM tbl_member
+WHERE userid = 'hong';
+
+
+# 닉네임 중복 확인
+SELECT nicname
+FROM tbl_member
+WHERE nickname = 'hong';
+
+
+# 좋음 컬럼 추가
+ALTER TABLE tbl_board
+ADD COLUMN viewLike INT DEFAULT '0' COMMENT '좋아요';
+
+
+# 싫음 컬럼 추가
+ALTER TABLE tbl_board
+ADD COLUMN viewHate INT DEFAULT '0' COMMENT '싫음개수' AFTER viewLike;
+
+
+# 댓글수 컬럼 추가
+ALTER TABLE tbl_board
+ADD COLUMN replyCnt INT DEFAULT '0' COMMENT '댓글수' AFTER viewHate;
+
+
+# 기존 댓글을 댓글수 컬럼에 추가
+UPDATE tbl_board SET
+	replycnt = (SELECT COUNT(rno) FROM tbl_reply WHERE tbl_reply.bno = tbl_board.bno);
+
+COMMIT;
+
+
+SELECT * FROM tbl_board
+ORDER BY bno DESC;
+
+
+
+
+
+
+
+
+
+
+
+
